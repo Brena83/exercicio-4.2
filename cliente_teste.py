@@ -7,7 +7,10 @@ from mcp.client.stdio import stdio_client
 
 
 async def main() -> dict:
-    params = StdioServerParameters(command="python", args=["servidor_mcp.py"])
+    params = StdioServerParameters(
+        command=sys.executable,
+        args=["servidor_mcp.py"],
+    )
     async with stdio_client(params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
@@ -29,5 +32,9 @@ async def main() -> dict:
 
 
 if __name__ == "__main__":
-    resultado = asyncio.run(main())
-    print(json.dumps(resultado))
+    try:
+        resultado = asyncio.run(main())
+        print(json.dumps(resultado))
+    except Exception as e:
+        print(f"ERRO: {e}", file=sys.stderr)
+        sys.exit(1)
