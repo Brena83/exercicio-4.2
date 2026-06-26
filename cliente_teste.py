@@ -1,10 +1,19 @@
 import asyncio
 import json
+import logging
 import os
 import sys
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+# Redireciona fd 2 (stderr) para /dev/null antes de qualquer import do MCP
+# O autograde concatena stderr ao stdout ao capturar a saída — sem isso, os
+# logs do SDK contaminam o JSON e o parse falha.
+_devnull = open(os.devnull, "w")
+os.dup2(_devnull.fileno(), 2)
+
+logging.disable(logging.CRITICAL)
+
+from mcp import ClientSession, StdioServerParameters  # noqa: E402
+from mcp.client.stdio import stdio_client  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -36,9 +45,5 @@ async def main() -> dict:
 
 
 if __name__ == "__main__":
-    try:
-        resultado = asyncio.run(main())
-        print(json.dumps(resultado))
-    except Exception as e:
-        print(f"ERRO: {e}", file=sys.stderr)
-        sys.exit(1)
+    resultado = asyncio.run(main())
+    print(json.dumps(resultado))
